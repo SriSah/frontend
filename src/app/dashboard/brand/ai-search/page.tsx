@@ -75,6 +75,13 @@ export default function AISearchPage() {
     setTimeout(() => setLoadingStep(3), 1600)
     setTimeout(() => setLoadingStep(4), 2400)
 
+    if (campaignNiche.length === 0 && campaignCategory.length === 0) {
+      alert("Please select at least one Category or Niche before running AI matching.");
+      setMatching(false);
+      setLoadingStep(0);
+      return;
+    }
+
     try {
       const data = await apiCall("post", "/ai/match", {
         campaign: {
@@ -90,9 +97,11 @@ export default function AISearchPage() {
         setMatching(false)
         setLoadingStep(0)
       }, 3200)
-    } catch {
+    } catch (err: any) {
       setMatching(false)
       setLoadingStep(0)
+      const msg = err.response?.data?.error || err.message || "Match failed";
+      alert(`AI Match Failed: ${msg}`);
     }
   }
 

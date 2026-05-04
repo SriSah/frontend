@@ -17,12 +17,12 @@ const FEATURES_DATA = {
     bg: "bg-blue-900/30",
     border: "border-blue-500/50",
     gradient: "from-blue-500 to-cyan-400",
-    short: "Every campaign is a smart contract. Deliverables are minted as unique ERC-721 NFTs on Polygon.",
+    short: "Every campaign is a smart contract. Deliverables are minted as unique ERC-721 NFTs on Ethereum.",
     details: (
       <div className="space-y-4 text-slate-300">
-        <p>Our platform uses a completely decentralized escrow system built on Ethereum/Polygon testnets to eliminate trust issues between Brands and Influencers.</p>
+        <p>Our platform uses a completely decentralized escrow system built on Ethereum testnets to eliminate trust issues between Brands and Influencers.</p>
         <ul className="space-y-2 list-disc pl-5">
-          <li><strong>Fund Locking:</strong> The negotiated INR budget is converted to native crypto (ETH/MATIC) and deposited into a smart contract. The funds are locked transparently on-chain.</li>
+          <li><strong>Fund Locking:</strong> The negotiated INR budget is converted to native crypto (ETH) and deposited into a smart contract. The funds are locked transparently on-chain.</li>
           <li><strong>Zero-Trust Fulfillment:</strong> Influencers know the money is guaranteed. Once they submit their deliverable and the brand verifies it, the smart contract automatically releases the funds to the influencer&apos;s wallet.</li>
           <li><strong>Proof-of-Work NFTs:</strong> Upon successful completion, a unique ERC-721 NFT is minted to the influencer&apos;s wallet. This serves as an immutable, on-chain resume showing their reliability and quality of work.</li>
         </ul>
@@ -36,13 +36,13 @@ const FEATURES_DATA = {
     bg: "bg-purple-900/30",
     border: "border-purple-500/50",
     gradient: "from-purple-500 to-pink-400",
-    short: "Groq-powered Llama 3.1 analyzes niches, bios, and engagement to find the perfect semantic fit.",
+    short: "Groq-powered Llama 1 analyzes niches, bios, and engagement to find the perfect semantic fit.",
     details: (
       <div className="space-y-4 text-slate-300">
         <p>Stop relying on basic keyword searches. InfluenceX uses a dedicated Python FastAPI microservice utilizing local embeddings and Groq inference to deeply understand context.</p>
         <ul className="space-y-2 list-disc pl-5">
           <li><strong>Deep Contextual Embeddings:</strong> We convert the brand&apos;s campaign description and the influencer&apos;s profile into high-dimensional vector embeddings using local sentence-transformers to capture abstract meaning.</li>
-          <li><strong>Llama 3.1 Reasoning:</strong> Powered by Groq&apos;s lightning-fast LPU inference engine, we pass the top semantic matches to Llama-3.1-8b, which reads the context and returns a final, heavily reasoned compatibility score.</li>
+          <li><strong>Llama 1 Reasoning:</strong> Powered by Groq&apos;s lightning-fast LPU inference engine, we pass the top semantic matches to Llama-1, which reads the context and returns a final, heavily reasoned compatibility score.</li>
           <li><strong>Abstract Matching:</strong> A brand asking for "eco-friendly outdoor gear" will be matched with an influencer whose bio talks about "sustainable hiking", even if they never use the exact same keywords.</li>
         </ul>
       </div>
@@ -95,17 +95,17 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative py-12 lg:py-20 overflow-hidden z-10">
+      <section className="relative pt-6 pb-12 lg:pt-8 lg:pb-20 overflow-hidden z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">
           <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-600/20 blur-[150px] rounded-full animate-pulse" style={{ animationDuration: '8s' }} />
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 blur-[120px] rounded-full animate-pulse" style={{ animationDuration: '12s' }} />
           <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] bg-emerald-600/10 blur-[100px] rounded-full" />
         </div>
         
-        <div className="container mx-auto px-6 text-center relative z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-200/50 dark:bg-slate-800/50 border border-slate-300/50 dark:border-slate-700/50 text-sm mb-8 backdrop-blur-md shadow-2xl hover:bg-slate-200/80 dark:bg-slate-800/80 transition-colors">
             <Sparkles className="h-4 w-4 text-yellow-400" />
-            <span className="text-slate-300">Now Powered by <strong className="text-white">Llama 3.1</strong> & <strong className="text-white">Polygon</strong></span>
+            <span className="text-slate-300">Now Powered by <strong className="text-white">Llama 1</strong> & <strong className="text-white">Ethereum</strong></span>
           </div>
           
           <h1 className="text-5xl lg:text-7xl xl:text-8xl font-black tracking-tight mb-8 leading-[1.1]">
@@ -121,7 +121,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href={role ? `/dashboard/${role.toLowerCase()}` : "/auth"}>
               <Button size="lg" className="h-14 bg-blue-600 hover:bg-blue-700 px-10 text-lg font-bold shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_40px_rgba(37,99,235,0.5)] transition-all rounded-xl">
-                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+                {role ? "Let's get started" : "Get Started Free"} <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Button 
@@ -138,7 +138,7 @@ export default function Home() {
 
       {/* Stats Section */}
       <section className="py-16 border-y border-slate-200/50 dark:border-slate-800/50 bg-white/30 dark:bg-slate-900/30 backdrop-blur-md relative z-10">
-        <div className="container mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 divide-x divide-slate-800/50">
             {[
               { label: "AI Matches", value: "1,200+", icon: Network },
@@ -164,49 +164,51 @@ export default function Home() {
       </section>
 
       {/* Features Ecosystem */}
-      <section id="features" className="py-32 container mx-auto px-6 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-5xl font-black mb-4">A Complete <span className="text-blue-400">Ecosystem</span></h2>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">Click on any module below to understand the technical architecture powering InfluenceX.</p>
-        </div>
+      <section id="features" className="pt-12 pb-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-5xl font-black mb-4">A Complete <span className="text-blue-400">Ecosystem</span></h2>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">Click on any module below to understand the technical architecture powering InfluenceX.</p>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {(Object.keys(FEATURES_DATA) as FeatureType[]).map((key) => {
-            if (!key) return null;
-            const feature = FEATURES_DATA[key];
-            const Icon = feature.icon;
-            return (
-              <button 
-                key={key} 
-                onClick={() => setActiveFeature(key)}
-                className="text-left w-full group outline-none"
-              >
-                <Card className={`h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border-slate-800 hover:bg-slate-200/80 dark:bg-slate-800/80 transition-all duration-300 relative overflow-hidden`}>
-                  <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
-                  <CardContent className="p-8">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className={`h-14 w-14 rounded-2xl ${feature.bg} flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all shadow-lg`}>
-                        <Icon className={`${feature.color} h-7 w-7`} />
+          <div className="grid md:grid-cols-3 gap-8">
+            {(Object.keys(FEATURES_DATA) as FeatureType[]).map((key) => {
+              if (!key) return null;
+              const feature = FEATURES_DATA[key];
+              const Icon = feature.icon;
+              return (
+                <button 
+                  key={key} 
+                  onClick={() => setActiveFeature(key)}
+                  className="text-left w-full group outline-none"
+                >
+                  <Card className={`h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border-slate-800 hover:bg-slate-200/80 dark:bg-slate-800/80 transition-all duration-300 relative overflow-hidden`}>
+                    <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                    <CardContent className="p-8">
+                      <div className="flex justify-between items-start mb-6">
+                        <div className={`h-14 w-14 rounded-2xl ${feature.bg} flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all shadow-lg`}>
+                          <Icon className={`${feature.color} h-7 w-7`} />
+                        </div>
+                        <div className="h-8 w-8 rounded-full border border-slate-700 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-slate-700 transition-all -translate-x-2 group-hover:translate-x-0">
+                          <ArrowRight className="h-4 w-4 text-white" />
+                        </div>
                       </div>
-                      <div className="h-8 w-8 rounded-full border border-slate-700 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-slate-700 transition-all -translate-x-2 group-hover:translate-x-0">
-                        <ArrowRight className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
-                    <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
-                    <p className="text-slate-400 leading-relaxed text-sm">
-                      {feature.short}
-                    </p>
-                  </CardContent>
-                </Card>
-              </button>
-            );
-          })}
+                      <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+                      <p className="text-slate-400 leading-relaxed text-sm">
+                        {feature.short}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* How it Works / Flow */}
-      <section className="py-24 border-t border-slate-200/50 dark:border-slate-800/50 bg-slate-100/50 dark:bg-slate-950/50 relative z-10">
-        <div className="container mx-auto px-6 max-w-5xl">
+      <section className="pt-12 pb-24 border-t border-slate-200/50 dark:border-slate-800/50 bg-slate-100/50 dark:bg-slate-950/50 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-5xl font-black mb-4">How It Works</h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">Choose your role to see the exact workflow from start to finish.</p>
@@ -299,7 +301,6 @@ export default function Home() {
           <div className="flex gap-6 text-sm text-slate-400 font-medium">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">API Docs</a>
           </div>
         </div>
       </footer>
