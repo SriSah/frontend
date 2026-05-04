@@ -430,10 +430,13 @@ export default function BrandDashboard() {
 
                     {neg.status === 'ACCEPTED' ? (
                       <div className="flex gap-2 flex-wrap pt-3 border-t border-slate-800">
-                        {!neg.brandAccepted ? (
+                        {!neg.brandSigned ? (
                           <Button size="sm" onClick={() => handleNegSign(neg.id)} className="bg-blue-600 hover:bg-blue-700 font-bold">Sign Contract</Button>
                         ) : (
-                          <span className="text-sm text-green-400 font-bold">Waiting for influencer to sign...</span>
+                          <span className="text-sm text-green-400 font-bold flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4" />
+                            {neg.influencerSigned ? "Signing complete!" : "Waiting for influencer to sign..."}
+                          </span>
                         )}
                       </div>
                     ) : null}

@@ -70,6 +70,7 @@ export default function InfluencerDashboard() {
         videoLength: (p.videoLength || "").split(", ").filter(Boolean) 
       })
       setCampaigns(camps as Campaign[])
+      console.log("DEBUG: Public Campaigns Received:", pubCamps);
       setPublicCampaigns(pubCamps as Campaign[])
       setNegotiations(negs as Negotiation[])
       if (p.walletAddress) {
@@ -361,10 +362,13 @@ export default function InfluencerDashboard() {
 
                       {neg.status === 'ACCEPTED' ? (
                         <div className="flex gap-2 flex-wrap pt-3 border-t border-slate-800">
-                          {!neg.influencerAccepted ? (
+                          {!neg.influencerSigned ? (
                             <Button size="sm" onClick={() => handleNegSign(neg.id)} className="bg-blue-600 hover:bg-blue-700 font-bold">Sign Contract</Button>
                           ) : (
-                            <span className="text-sm text-green-400 font-bold">Waiting for brand to sign...</span>
+                            <span className="text-sm text-green-400 font-bold flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4" /> 
+                              {neg.brandSigned ? "Signing complete!" : "Waiting for brand to sign..."}
+                            </span>
                           )}
                         </div>
                       ) : null}
