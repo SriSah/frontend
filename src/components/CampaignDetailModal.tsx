@@ -92,6 +92,11 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
 
   const sendOffer = async () => {
     if (!offerBudget) return
+    const budgetNum = parseInt(offerBudget);
+    if (isNaN(budgetNum) || budgetNum <= 0) {
+      alert("Offer budget must be a number greater than 0.");
+      return;
+    }
     setActionLoading("offer")
     try {
       const payload: Record<string, unknown> = {
@@ -147,6 +152,11 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
 
   const handleCounter = async (negId: string) => {
     if (!counterBudget) return
+    const budgetNum = parseInt(counterBudget);
+    if (isNaN(budgetNum) || budgetNum <= 0) {
+      alert("Counter offer must be a number greater than 0.");
+      return;
+    }
     setActionLoading(negId + "_counter")
     try {
       const updated = await apiCall("patch", `/negotiations/${negId}/counter`, {

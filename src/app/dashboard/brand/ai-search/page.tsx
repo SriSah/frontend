@@ -82,6 +82,13 @@ export default function AISearchPage() {
       return;
     }
 
+    if (!campaignBudget || isNaN(Number(campaignBudget)) || Number(campaignBudget) <= 0) {
+      alert("Please enter a valid budget greater than 0.");
+      setMatching(false);
+      setLoadingStep(0);
+      return;
+    }
+
     try {
       const data = await apiCall("post", "/ai/match", {
         campaign: {
@@ -107,6 +114,13 @@ export default function AISearchPage() {
 
   const sendInvite = async () => {
     if (!inviteInf || !inviteDeliverable || !inviteBudget) return
+    
+    const budgetNum = parseInt(inviteBudget);
+    if (isNaN(budgetNum) || budgetNum <= 0) {
+      alert("Invite budget must be a number greater than 0.");
+      return;
+    }
+    
     setInviteLoading(true)
     try {
       const res = await apiCall("post", "/negotiations", {

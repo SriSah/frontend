@@ -76,6 +76,23 @@ export default function InfluencerDashboard() {
   useEffect(() => { fetchData() }, [fetchData])
 
   const saveProfile = async () => {
+    const pricingNum = parseInt(profileForm.pricing);
+    const followersNum = parseInt(profileForm.followers);
+    const engRateNum = parseFloat(profileForm.engagementRate);
+
+    if (isNaN(pricingNum) || pricingNum <= 0) {
+      alert("Base pricing must be a number greater than 0.");
+      return;
+    }
+    if (isNaN(followersNum) || followersNum < 0) {
+      alert("Followers cannot be negative.");
+      return;
+    }
+    if (isNaN(engRateNum) || engRateNum < 0) {
+      alert("Engagement rate cannot be negative.");
+      return;
+    }
+
     setSavingProfile(true)
     try {
       await apiCall("patch", "/influencers/me", {
@@ -109,8 +126,13 @@ export default function InfluencerDashboard() {
 
   const handleNegCounter = async (id: string) => {
     const amount = prompt("Enter your counter offer amount (₹):")
-    if (!amount || isNaN(parseInt(amount))) return
-    try { await apiCall("patch", `/negotiations/${id}/counter`, { counterBudget: parseInt(amount) }); fetchData() } catch (err) { console.error(err) }
+    if (!amount) return
+    const budgetNum = parseInt(amount);
+    if (isNaN(budgetNum) || budgetNum <= 0) {
+      alert("Counter offer must be a number greater than 0.");
+      return;
+    }
+    try { await apiCall("patch", `/negotiations/${id}/counter`, { counterBudget: budgetNum }); fetchData() } catch (err) { console.error(err) }
   }
 
   const handleNegSign = async (id: string) => {
