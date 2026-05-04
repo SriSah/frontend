@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
@@ -7,16 +7,23 @@ import { formatCurrency } from "@/lib/utils"
 import { X, Calculator, Info } from "lucide-react"
 
 interface CampaignModalProps {
-  influencer: any;
+  influencer: {
+    id: number | string;
+    name: string;
+    platform: string;
+    niche: string;
+    pricing?: number;
+    fraudRisk?: string;
+  };
   aiScore: number;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: { influencerId: number | string; budget: number; deliverable: string }) => void;
 }
 
 export function CampaignModal({ influencer, aiScore, isOpen, onClose, onSubmit }: CampaignModalProps) {
   const [deliverable, setDeliverable] = useState("")
-  const [basePrice, setBasePrice] = useState(influencer?.pricing || 0)
+  const [basePrice] = useState(influencer?.pricing || 0)
   
   if (!isOpen) return null
 
@@ -47,7 +54,7 @@ export function CampaignModal({ influencer, aiScore, isOpen, onClose, onSubmit }
             </div>
             <div>
               <p className="font-semibold">{influencer.name}</p>
-              <p className="text-sm text-slate-400">{influencer.niche} • {influencer.platform}</p>
+              <p className="text-sm text-slate-400">{influencer.niche} - {influencer.platform}</p>
             </div>
             <div className="ml-auto text-right">
               <Badge variant="ai">AI Score: {aiScore}</Badge>
@@ -116,3 +123,4 @@ export function CampaignModal({ influencer, aiScore, isOpen, onClose, onSubmit }
     </div>
   )
 }
+
