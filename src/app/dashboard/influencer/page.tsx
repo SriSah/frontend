@@ -392,7 +392,6 @@ export default function InfluencerDashboard() {
                         <p className="text-xs text-blue-400 font-mono mb-1">#{camp.id.slice(-8)}</p>
                         <p className="font-bold text-white mb-1">{camp.deliverable}</p>
                         <p className="text-xs text-slate-400">{camp.brand?.name}</p>
-                        {camp.status === 'ACTIVE' && <Button size="sm" className="mt-3 bg-green-600 hover:bg-green-700" onClick={(e) => { e.stopPropagation(); handleComplete(camp.id); }}>Submit Work</Button>}
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-bold text-white">₹{camp.budget.toLocaleString()}</p>
