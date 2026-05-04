@@ -152,8 +152,23 @@ export default function AISearchPage() {
     : influencers;
 
   const displayResults = filteredInfluencers.filter(inf => {
-    if (campaignNiche.length > 0 && (!inf.niche || !campaignNiche.includes(inf.niche))) return false;
-    if (campaignVideoLength.length > 0 && (!inf.videoLength || !campaignVideoLength.includes(inf.videoLength))) return false;
+    // Check if influencer matches any of the selected niches/categories
+    if (campaignNiche.length > 0) {
+      const infNiches = (inf.niche || "").split(", ").map(n => n.trim());
+      if (!campaignNiche.some(n => infNiches.includes(n))) return false;
+    }
+    
+    // Check if influencer matches any of the selected categories (if we want to filter by category too)
+    if (campaignCategory.length > 0) {
+      const infNiches = (inf.niche || "").split(", ").map(n => n.trim());
+      if (!campaignCategory.some(c => infNiches.includes(c))) return false;
+    }
+
+    if (campaignVideoLength.length > 0) {
+      const infLengths = (inf.videoLength || "").split(", ").map(v => v.trim());
+      if (!campaignVideoLength.some(v => infLengths.includes(v))) return false;
+    }
+
     if (campaignBudget) {
       const price = inf.pricing;
       const budget = parseInt(campaignBudget);
@@ -185,7 +200,7 @@ export default function AISearchPage() {
             <div className="flex-1 min-w-[200px]">
               <label className="text-xs text-slate-400 uppercase font-bold mb-2 block">Category</label>
               <div className="flex flex-wrap gap-2">
-                {["Tech", "Gaming", "Beauty", "Lifestyle", "Fashion", "Food", "Travel", "Finance"].map(opt => (
+                {["Tech", "Gaming", "Beauty", "Lifestyle", "Fashion", "Food", "Travel", "Finance", "Others"].map(opt => (
                   <button 
                     key={opt}
                     onClick={() => toggleSelection(opt, campaignCategory, setCampaignCategory)}
@@ -208,7 +223,7 @@ export default function AISearchPage() {
             <div className="flex-1 min-w-[200px]">
               <label className="text-xs text-slate-400 uppercase font-bold mb-2 block">Niche</label>
               <div className="flex flex-wrap gap-2">
-                {["Hardware", "Software", "Makeup", "Fitness", "SaaS", "Skincare", "Vlogging", "Crypto"].map(opt => (
+                {["Hardware", "Software", "Makeup", "Fitness", "SaaS", "Skincare", "Vlogging", "Crypto", "Others"].map(opt => (
                   <button 
                     key={opt}
                     onClick={() => toggleSelection(opt, campaignNiche, setCampaignNiche)}
@@ -222,7 +237,7 @@ export default function AISearchPage() {
             <div className="flex-1 min-w-[200px]">
               <label className="text-xs text-slate-400 uppercase font-bold mb-2 block">Video Length</label>
               <div className="flex flex-wrap gap-2">
-                {["60s", "3min", "5min", "15min"].map(opt => (
+                {["60s", "3min", "5min", "15min", "Others"].map(opt => (
                   <button 
                     key={opt}
                     onClick={() => toggleSelection(opt, campaignVideoLength, setCampaignVideoLength)}

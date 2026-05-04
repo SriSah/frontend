@@ -62,7 +62,7 @@ export default function BrandDashboard() {
   const [profileForm, setProfileForm] = useState({ name: "", industry: "", website: "", description: "", budgetMin: "", budgetMax: "" })
   const [savingProfile, setSavingProfile] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
-  const [newCampaignForm, setNewCampaignForm] = useState({ deliverable: "", budget: "", niche: "", videoLength: "" })
+  const [newCampaignForm, setNewCampaignForm] = useState({ deliverable: "", budget: "", niche: [] as string[], videoLength: [] as string[] })
   const [creatingCampaign, setCreatingCampaign] = useState(false)
   const [showNewCampaign, setShowNewCampaign] = useState(false)
 
@@ -99,12 +99,27 @@ export default function BrandDashboard() {
     if (!newCampaignForm.deliverable || !newCampaignForm.budget) return
     setCreatingCampaign(true)
     try {
-      await apiCall("post", "/campaigns", { deliverable: newCampaignForm.deliverable, budget: parseInt(newCampaignForm.budget), niche: newCampaignForm.niche, videoLength: newCampaignForm.videoLength })
-      setNewCampaignForm({ deliverable: "", budget: "", niche: "", videoLength: "" })
+      await apiCall("post", "/campaigns", { 
+        deliverable: newCampaignForm.deliverable, 
+        budget: parseInt(newCampaignForm.budget), 
+        niche: newCampaignForm.niche.join(", "), 
+        videoLength: newCampaignForm.videoLength.join(", ") 
+      })
+      setNewCampaignForm({ deliverable: "", budget: "", niche: [], videoLength: [] })
       setShowNewCampaign(false)
       fetchData()
     } catch (err) { console.error(err) }
     finally { setCreatingCampaign(false) }
+  }
+
+  const toggleNewCampItem = (field: "niche" | "videoLength", value: string) => {
+    setNewCampaignForm(prev => {
+      const current = prev[field]
+      const updated = current.includes(value) 
+        ? current.filter(item => item !== value)
+        : [...current, value]
+      return { ...prev, [field]: updated }
+    })
   }
 
   const handleNegAccept = async (id: string) => {
@@ -450,19 +465,27 @@ export default function BrandDashboard() {
                       <label className="text-xs text-slate-400 uppercase font-bold mb-1 block">Budget (₹)</label>
                       <input type="number" className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" placeholder="2500" value={newCampaignForm.budget} onChange={e => setNewCampaignForm({ ...newCampaignForm, budget: e.target.value })} />
                     </div>
-                    <div>
-                      <label className="text-xs text-slate-400 uppercase font-bold mb-1 block">Niche</label>
-                      <select className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={newCampaignForm.niche} onChange={e => setNewCampaignForm({ ...newCampaignForm, niche: e.target.value })}>
-                        <option value="">Any</option>
-                        {["Tech", "Gaming", "Beauty", "Fitness", "Fashion", "Food", "Travel", "Finance", "Lifestyle"].map(n => <option key={n} value={n}>{n}</option>)}
-                      </select>
+                    <div className="col-span-2">
+                      <label className="text-xs text-slate-400 uppercase font-bold mb-3 block">Niches</label>
+                      <div className="flex flex-wrap gap-2">
+                        {["Tech", "Gaming", "Beauty", "Fitness", "Fashion", "Food", "Travel", "Finance", "Lifestyle", "Others"].map(n => (
+                          <button key={n} type="button" onClick={() => toggleNewCampItem("niche", n)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${newCampaignForm.niche.includes(n) ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20" : "bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500"}`}>
+                            {n}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <label className="text-xs text-slate-400 uppercase font-bold mb-1 block">Video Length</label>
-                      <select className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={newCampaignForm.videoLength} onChange={e => setNewCampaignForm({ ...newCampaignForm, videoLength: e.target.value })}>
-                        <option value="">Any</option>
-                        {["60s", "3min", "5min", "10min", "15min", "30min+"].map(v => <option key={v} value={v}>{v}</option>)}
-                      </select>
+                    <div className="col-span-2">
+                      <label className="text-xs text-slate-400 uppercase font-bold mb-3 block">Video Lengths</label>
+                      <div className="flex flex-wrap gap-2">
+                        {["60s", "3min", "5min", "10min", "15min", "30min+", "Others"].map(v => (
+                          <button key={v} type="button" onClick={() => toggleNewCampItem("videoLength", v)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${newCampaignForm.videoLength.includes(v) ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/20" : "bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500"}`}>
+                            {v}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-3">

@@ -39,7 +39,7 @@ export default function InfluencerDashboard() {
   const [reputationLoading, setReputationLoading] = useState(false)
   const [reputationError, setReputationError] = useState(false)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
-  const [profileForm, setProfileForm] = useState({ name: "", platform: "", niche: "", bio: "", pricing: "", followers: "", engagementRate: "", walletAddress: "", videoLength: "" })
+  const [profileForm, setProfileForm] = useState({ name: "", platform: [] as string[], niche: [] as string[], bio: "", pricing: "", followers: "", engagementRate: "", walletAddress: "", videoLength: [] as string[] })
   const [savingProfile, setSavingProfile] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
 
@@ -58,7 +58,17 @@ export default function InfluencerDashboard() {
       const p = prof as InfluencerProfile
       setProfile(p)
       if (p.name) updateName(p.name)
-      setProfileForm({ name: p.name || "", platform: p.platform || "", niche: p.niche || "", bio: p.bio || "", pricing: p.pricing?.toString() || "", followers: p.followers?.toString() || "", engagementRate: p.engagementRate?.toString() || "", walletAddress: p.walletAddress || "", videoLength: p.videoLength || "" })
+      setProfileForm({ 
+        name: p.name || "", 
+        platform: (p.platform || "").split(", ").filter(Boolean), 
+        niche: (p.niche || "").split(", ").filter(Boolean), 
+        bio: p.bio || "", 
+        pricing: p.pricing?.toString() || "", 
+        followers: p.followers?.toString() || "", 
+        engagementRate: p.engagementRate?.toString() || "", 
+        walletAddress: p.walletAddress || "", 
+        videoLength: (p.videoLength || "").split(", ").filter(Boolean) 
+      })
       setCampaigns(camps as Campaign[])
       setPublicCampaigns(pubCamps as Campaign[])
       setNegotiations(negs as Negotiation[])
@@ -96,11 +106,15 @@ export default function InfluencerDashboard() {
     setSavingProfile(true)
     try {
       await apiCall("patch", "/influencers/me", {
-        name: profileForm.name, platform: profileForm.platform, niche: profileForm.niche, bio: profileForm.bio,
+        name: profileForm.name, 
+        platform: profileForm.platform.join(", "), 
+        niche: profileForm.niche.join(", "), 
+        bio: profileForm.bio,
         pricing: parseInt(profileForm.pricing) || 0, 
         followers: parseInt(profileForm.followers) || 0, 
         engagementRate: parseFloat(profileForm.engagementRate) || 0,
-        walletAddress: profileForm.walletAddress, videoLength: profileForm.videoLength
+        walletAddress: profileForm.walletAddress, 
+        videoLength: profileForm.videoLength.join(", ")
       })
       setProfileSaved(true)
       setTimeout(() => setProfileSaved(false), 2000)
@@ -139,6 +153,16 @@ export default function InfluencerDashboard() {
     try { await apiCall("patch", `/negotiations/${id}/sign`); fetchData(); alert("Campaign officially signed and is now Active!") } catch (err: any) { alert(err.response?.data?.error || err.message) }
   }
 
+  const toggleArrayItem = (field: "niche" | "platform" | "videoLength", value: string) => {
+    setProfileForm(prev => {
+      const current = prev[field]
+      const updated = current.includes(value) 
+        ? current.filter(item => item !== value)
+        : [...current, value]
+      return { ...prev, [field]: updated }
+    })
+  }
+
   const TABS = [
     { id: "profile" as Tab, label: "Profile", icon: User },
     { id: "dashboard" as Tab, label: "My Dashboard", icon: LayoutDashboard },
@@ -169,14 +193,62 @@ export default function InfluencerDashboard() {
               <Card className="bg-slate-900 border-slate-800">
                 <CardContent className="p-8 space-y-5">
                   <form onSubmit={(e) => { e.preventDefault(); saveProfile(); }} className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Name <span className="text-red-400">*</span></label><input required className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.name} onChange={e => setProfileForm({ ...profileForm, name: e.target.value })} /></div>
-                      <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Platform <span className="text-red-400">*</span></label><input required className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" placeholder="e.g. YouTube, Instagram" value={profileForm.platform} onChange={e => setProfileForm({ ...profileForm, platform: e.target.value })} /></div>
-                      <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Niche <span className="text-red-400">*</span></label><select required className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.niche} onChange={e => setProfileForm({ ...profileForm, niche: e.target.value })}><option value="">Select Niche</option>{["Tech", "Gaming", "Beauty", "Fitness", "Fashion", "Food", "Travel", "Finance", "Lifestyle"].map(n => <option key={n} value={n}>{n}</option>)}</select></div>
-                      <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Preferred Video Length <span className="text-red-400">*</span></label><select required className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.videoLength} onChange={e => setProfileForm({ ...profileForm, videoLength: e.target.value })}><option value="">Any</option>{["60s", "3min", "5min", "10min", "15min", "30min+"].map(v => <option key={v} value={v}>{v}</option>)}</select></div>
-                      <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Followers <span className="text-red-400">*</span></label><input required type="number" className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.followers} onChange={e => setProfileForm({ ...profileForm, followers: e.target.value })} /></div>
-                      <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Engagement Rate (%) <span className="text-red-400">*</span></label><input required type="number" step="0.1" className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.engagementRate} onChange={e => setProfileForm({ ...profileForm, engagementRate: e.target.value })} /></div>
-                      <div className="col-span-2"><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Base Pricing (₹) <span className="text-red-400">*</span></label><input required type="number" className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.pricing} onChange={e => setProfileForm({ ...profileForm, pricing: e.target.value })} /></div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Name <span className="text-red-400">*</span></label>
+                        <input required className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.name} onChange={e => setProfileForm({ ...profileForm, name: e.target.value })} />
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="text-xs text-slate-400 uppercase font-bold mb-3 block">Platforms <span className="text-red-400">*</span></label>
+                          <div className="flex flex-wrap gap-2">
+                            {["YouTube", "Instagram", "TikTok", "Twitter", "LinkedIn", "Others"].map(p => (
+                              <button key={p} type="button" onClick={() => toggleArrayItem("platform", p)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${profileForm.platform.includes(p) ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20" : "bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500"}`}>
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-slate-400 uppercase font-bold mb-3 block">Niches <span className="text-red-400">*</span></label>
+                          <div className="flex flex-wrap gap-2">
+                            {["Tech", "Gaming", "Beauty", "Fitness", "Fashion", "Food", "Travel", "Finance", "Lifestyle", "Others"].map(n => (
+                              <button key={n} type="button" onClick={() => toggleArrayItem("niche", n)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${profileForm.niche.includes(n) ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20" : "bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500"}`}>
+                                {n}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="text-xs text-slate-400 uppercase font-bold mb-3 block">Preferred Video Lengths <span className="text-red-400">*</span></label>
+                          <div className="flex flex-wrap gap-2">
+                            {["60s", "3min", "5min", "10min", "15min", "30min+", "Others"].map(v => (
+                              <button key={v} type="button" onClick={() => toggleArrayItem("videoLength", v)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${profileForm.videoLength.includes(v) ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/20" : "bg-slate-950 border-slate-700 text-slate-400 hover:border-slate-500"}`}>
+                                {v}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Followers <span className="text-red-400">*</span></label>
+                          <input required type="number" className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.followers} onChange={e => setProfileForm({ ...profileForm, followers: e.target.value })} />
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Engagement Rate (%) <span className="text-red-400">*</span></label><input required type="number" step="0.1" className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.engagementRate} onChange={e => setProfileForm({ ...profileForm, engagementRate: e.target.value })} /></div>
+                        <div><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Base Pricing (₹) <span className="text-red-400">*</span></label><input required type="number" className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm" value={profileForm.pricing} onChange={e => setProfileForm({ ...profileForm, pricing: e.target.value })} /></div>
+                      </div>
+
                       <div className="col-span-2"><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Ethereum Wallet Address (For NFTs/Payments) <span className="text-red-400">*</span></label><input required className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm font-mono" placeholder="0x..." value={profileForm.walletAddress} onChange={e => setProfileForm({ ...profileForm, walletAddress: e.target.value })} /></div>
                       <div className="col-span-2"><label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Bio <span className="text-red-400">*</span></label><textarea required className="w-full px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white text-sm h-24 resize-none" value={profileForm.bio} onChange={e => setProfileForm({ ...profileForm, bio: e.target.value })} /></div>
                     </div>
@@ -205,7 +277,7 @@ export default function InfluencerDashboard() {
                           <h4 className="font-bold text-xl text-white">{profileForm.name || "Influencer Name"}</h4>
                           <Award className="h-4 w-4 text-yellow-500" />
                         </div>
-                        <p className="text-sm text-slate-400">{profileForm.niche || "Niche"} Creator on {profileForm.platform || "Platform"}</p>
+                        <p className="text-sm text-slate-400">{(profileForm.niche.length > 0 ? profileForm.niche.join(", ") : "Niche")} Creator on {(profileForm.platform.length > 0 ? profileForm.platform.join(", ") : "Platform")}</p>
                       </div>
                       
                       <div className="flex gap-4">
@@ -360,8 +432,8 @@ export default function InfluencerDashboard() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {publicCampaigns
-              .filter(c => !nicheFilter || c.niche === nicheFilter)
-              .filter(c => !videoLengthFilter || c.videoLength === videoLengthFilter)
+              .filter(c => !nicheFilter || (c.niche || "").includes(nicheFilter))
+              .filter(c => !videoLengthFilter || (c.videoLength || "").includes(videoLengthFilter))
               .map(camp => (
               <Card key={camp.id} className="bg-slate-900/50 hover:border-blue-500/40 border-slate-800 transition-colors flex flex-col">
                 <CardContent className="p-5 flex-1 flex flex-col">
