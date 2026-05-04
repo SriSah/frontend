@@ -29,7 +29,7 @@ type Campaign = {
   id: string; deliverable: string; status: string; budget: number;
   niche?: string | null; videoLength?: string | null; isPublic?: boolean;
   brand?: { id: string; name: string; industry?: string | null };
-  influencer?: { id: string; name: string; niche?: string | null } | null;
+  influencer?: { id: string; name: string; niche?: string | null; followers?: number; engagementRate?: number } | null;
   contractSignedAt?: string | null; txHash?: string | null;
 }
 

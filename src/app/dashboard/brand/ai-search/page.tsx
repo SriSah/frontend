@@ -36,10 +36,15 @@ export default function AISearchPage() {
   const [influencers, setInfluencers] = useState<Influencer[]>([])
   const [matches, setMatches] = useState<MatchResponse["results"]>([])
   
-  const [campaignCategory, setCampaignCategory] = useState("")
+  const [campaignCategory, setCampaignCategory] = useState<string[]>([])
   const [campaignBudget, setCampaignBudget] = useState("")
-  const [campaignNiche, setCampaignNiche] = useState("")
-  const [campaignVideoLength, setCampaignVideoLength] = useState("")
+  const [campaignNiche, setCampaignNiche] = useState<string[]>([])
+  const [campaignVideoLength, setCampaignVideoLength] = useState<string[]>([])
+  
+  const toggleSelection = (val: string, current: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    if (current.includes(val)) setter(current.filter(v => v !== val))
+    else setter([...current, val])
+  }
   
   const [matching, setMatching] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
@@ -73,7 +78,7 @@ export default function AISearchPage() {
     try {
       const data = await apiCall("post", "/ai/match", {
         campaign: {
-          niche: campaignNiche || campaignCategory,
+          niche: [...campaignNiche, ...campaignCategory].join(", "),
           budget: Number(campaignBudget) || 1000,
           target_audience: "general",
           description: "Match me with top creators"
@@ -99,7 +104,7 @@ export default function AISearchPage() {
         influencerId: inviteInf.id,
         offeredBudget: parseInt(inviteBudget),
         deliverable: inviteDeliverable,
-        videoLength: campaignVideoLength || "Any"
+        videoLength: campaignVideoLength.length > 0 ? campaignVideoLength.join(", ") : "Any"
       })
       if (res && typeof res === 'object' && 'error' in res) {
           throw new Error(String(res.error))
@@ -124,8 +129,8 @@ export default function AISearchPage() {
     : influencers;
 
   const displayResults = filteredInfluencers.filter(inf => {
-    if (campaignNiche && inf.niche !== campaignNiche) return false;
-    if (campaignVideoLength && inf.videoLength && inf.videoLength !== campaignVideoLength) return false;
+    if (campaignNiche.length > 0 && (!inf.niche || !campaignNiche.includes(inf.niche))) return false;
+    if (campaignVideoLength.length > 0 && (!inf.videoLength || !campaignVideoLength.includes(inf.videoLength))) return false;
     if (campaignBudget) {
       const price = inf.pricing;
       const budget = parseInt(campaignBudget);
@@ -154,44 +159,56 @@ export default function AISearchPage() {
       <Card className="bg-slate-900 border-blue-500/20 shadow-blue-900/10">
         <CardContent className="p-6">
           <div className="flex flex-wrap gap-4 items-end">
-            <div className="flex-1 min-w-[150px]">
-              <label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Category</label>
-              <select className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-950 focus:ring-2 focus:ring-blue-500 text-sm" value={campaignCategory} onChange={e => setCampaignCategory(e.target.value)}>
-                <option value="">All Categories</option>
-                <option value="Tech">Tech</option>
-                <option value="Gaming">Gaming</option>
-                <option value="Beauty">Beauty</option>
-                <option value="Lifestyle">Lifestyle</option>
-              </select>
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-xs text-slate-400 uppercase font-bold mb-2 block">Category</label>
+              <div className="flex flex-wrap gap-2">
+                {["Tech", "Gaming", "Beauty", "Lifestyle", "Fashion", "Food", "Travel", "Finance"].map(opt => (
+                  <button 
+                    key={opt}
+                    onClick={() => toggleSelection(opt, campaignCategory, setCampaignCategory)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${campaignCategory.includes(opt) ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'}`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Budget Range</label>
-              <select className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-950 focus:ring-2 focus:ring-blue-500 text-sm" value={campaignBudget} onChange={e => setCampaignBudget(e.target.value)}>
+              <label className="text-xs text-slate-400 uppercase font-bold mb-2 block">Budget Range</label>
+              <select className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 focus:ring-2 focus:ring-blue-500 text-sm" value={campaignBudget} onChange={e => setCampaignBudget(e.target.value)}>
                 <option value="">Any Budget</option>
-                <option value="500">Under $500</option>
-                <option value="2000">$500 - $2,000</option>
-                <option value="5000">$2,000+</option>
+                <option value="500">Under ₹500</option>
+                <option value="2000">₹500 - ₹2,000</option>
+                <option value="5000">₹2,000+</option>
               </select>
             </div>
-            <div className="flex-1 min-w-[150px]">
-              <label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Niche</label>
-              <select className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-950 focus:ring-2 focus:ring-blue-500 text-sm" value={campaignNiche} onChange={e => setCampaignNiche(e.target.value)}>
-                <option value="">All Niches</option>
-                <option value="Hardware">Hardware</option>
-                <option value="Software">Software</option>
-                <option value="Makeup">Makeup</option>
-                <option value="Fitness">Fitness</option>
-              </select>
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-xs text-slate-400 uppercase font-bold mb-2 block">Niche</label>
+              <div className="flex flex-wrap gap-2">
+                {["Hardware", "Software", "Makeup", "Fitness", "SaaS", "Skincare", "Vlogging", "Crypto"].map(opt => (
+                  <button 
+                    key={opt}
+                    onClick={() => toggleSelection(opt, campaignNiche, setCampaignNiche)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${campaignNiche.includes(opt) ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'}`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex-1 min-w-[150px]">
-              <label className="text-xs text-slate-400 uppercase font-bold mb-1.5 block">Video Length</label>
-              <select className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-950 focus:ring-2 focus:ring-blue-500 text-sm" value={campaignVideoLength} onChange={e => setCampaignVideoLength(e.target.value)}>
-                <option value="">Any Length</option>
-                <option value="60s">60 Seconds</option>
-                <option value="3min">3 Minutes</option>
-                <option value="5min">5 Minutes</option>
-                <option value="15min">15+ Minutes</option>
-              </select>
+            <div className="flex-1 min-w-[200px]">
+              <label className="text-xs text-slate-400 uppercase font-bold mb-2 block">Video Length</label>
+              <div className="flex flex-wrap gap-2">
+                {["60s", "3min", "5min", "15min"].map(opt => (
+                  <button 
+                    key={opt}
+                    onClick={() => toggleSelection(opt, campaignVideoLength, setCampaignVideoLength)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${campaignVideoLength.includes(opt) ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'}`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
             </div>
             <Button 
               className="py-2.5 h-[42px] text-white shadow-lg shadow-blue-900/20 font-bold bg-blue-600 hover:bg-blue-700 w-full sm:w-auto" 

@@ -7,7 +7,8 @@ import { formatCurrency } from "@/lib/utils"
 import { apiCall } from "@/lib/api"
 import {
   X, DollarSign, FileText, Clock, CheckCircle2,
-  MessageSquare, ArrowRight, Pen, Send, RefreshCw
+  MessageSquare, ArrowRight, Pen, Send, RefreshCw,
+  Sparkles, ExternalLink
 } from "lucide-react"
 
 interface Negotiation {
@@ -342,7 +343,7 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                     </div>
                   )}
                   {campaign.status === 'ACTIVE' && role === 'BRAND' && (
-                    <p className="text-sm text-slate-400 italic text-center py-2">Waiting for influencer to submit the deliverable...</p>
+                    <p className="text-slate-400 text-sm">Waiting for Influencer to sign the final contract...</p>
                   )}
 
                   {campaign.status === 'DELIVERED' && role === 'BRAND' && (
@@ -425,7 +426,7 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
 
               {/* Active negotiation thread */}
               {showNegs && negotiations.length === 0 && (
-                <p className="text-slate-500 text-sm text-center py-4">No negotiations yet.</p>
+                <p className="text-slate-400 text-sm">Waiting for Brand to sign the final contract...</p>
               )}
 
               {negotiations.map(neg => (
@@ -441,7 +442,7 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                   </div>
 
                   {neg.note && (
-                    <p className="text-slate-300 text-sm italic">"{neg.note}"</p>
+                    <p className="text-slate-300 text-sm italic">&quot;{neg.note}&quot;</p>
                   )}
 
                   {neg.counterBudget && (
@@ -449,7 +450,7 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                       <ArrowRight className="h-3 w-3 text-purple-400" />
                       <span className="text-slate-400">Counter offer:</span>
                       <span className="text-purple-400 font-bold">{formatCurrency(neg.counterBudget)}</span>
-                      {neg.counterNote && <span className="text-slate-500 italic">— "{neg.counterNote}"</span>}
+                      {neg.counterNote && <span className="text-slate-500 italic">&mdash; &quot;{neg.counterNote}&quot;</span>}
                     </div>
                   )}
 
