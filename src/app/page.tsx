@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
 import { Zap, ShieldCheck, BarChart3, ArrowRight, X, Sparkles, Network, Coins } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -43,7 +42,7 @@ const FEATURES_DATA = {
         <ul className="space-y-2 list-disc pl-5">
           <li><strong>Deep Contextual Embeddings:</strong> We convert the brand&apos;s campaign description and the influencer&apos;s profile into high-dimensional vector embeddings using local sentence-transformers to capture abstract meaning.</li>
           <li><strong>Llama 1 Reasoning:</strong> Powered by Groq&apos;s lightning-fast LPU inference engine, we pass the top semantic matches to Llama-1, which reads the context and returns a final, heavily reasoned compatibility score.</li>
-          <li><strong>Abstract Matching:</strong> A brand asking for "eco-friendly outdoor gear" will be matched with an influencer whose bio talks about "sustainable hiking", even if they never use the exact same keywords.</li>
+          <li><strong>Abstract Matching:</strong> A brand asking for &quot;eco-friendly outdoor gear&quot; will be matched with an influencer whose bio talks about &quot;sustainable hiking&quot;, even if they never use the exact same keywords.</li>
         </ul>
       </div>
     )

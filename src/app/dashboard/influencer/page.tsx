@@ -3,15 +3,14 @@ import React, { useState, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
-import { Input } from "@/components/ui/Input"
 import { apiCall, getReputation } from "@/lib/api"
 import { CampaignDetailModal } from "@/components/CampaignDetailModal"
-import { Wallet, Award, DollarSign, Clock, Settings, ExternalLink, CheckCircle, Shield, Star, Zap, AlertCircle, User, LayoutDashboard, Search, Globe, HandshakeIcon } from "lucide-react"
+import { Wallet, Award, DollarSign, Clock, ExternalLink, CheckCircle2, Shield, Zap, AlertCircle, User, LayoutDashboard, Globe, HandshakeIcon } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 type InfluencerProfile = { id: string; name: string; platform: string; niche: string; bio?: string; engagementRate: number; pricing: number; walletAddress?: string; videoLength?: string; followers?: number }
 type Campaign = { id: string; deliverable: string; status: string; budget: number; nftTokenId?: string | null; txHash?: string | null; chainCampaignId?: string | null; brand?: { id: string; name: string; industry?: string | null }; influencer?: { id: string; name: string; niche?: string | null } | null; isPublic?: boolean; niche?: string; videoLength?: string }
-type Negotiation = { id: string; brandId: string; brand: { name: string }; offeredBudget: number; counterBudget?: number; finalBudget?: number; deliverable: string; status: string; initiatedBy: string; brandAccepted: boolean; influencerAccepted: boolean; note?: string; counterNote?: string }
+type Negotiation = { id: string; brandId: string; brand: { name: string }; offeredBudget: number; counterBudget?: number; finalBudget?: number; deliverable: string; status: string; initiatedBy: string; brandAccepted: boolean; influencerAccepted: boolean; brandSigned: boolean; influencerSigned: boolean; note?: string; counterNote?: string }
 type ReputationData = { totalReputationScore: number; completedCampaigns: number; tier: "Bronze" | "Silver" | "Gold" }
 type Tab = "profile" | "dashboard" | "browse"
 
@@ -31,7 +30,6 @@ const STATUS_BADGE: Record<string, string> = {
 export default function InfluencerDashboard() {
   const { updateName } = useAuth()
   const [tab, setTab] = useState<Tab>("dashboard")
-  const [profile, setProfile] = useState<InfluencerProfile | null>(null)
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [negotiations, setNegotiations] = useState<Negotiation[]>([])
   const [publicCampaigns, setPublicCampaigns] = useState<Campaign[]>([])
@@ -56,7 +54,6 @@ export default function InfluencerDashboard() {
         apiCall("get", "/negotiations")
       ])
       const p = prof as InfluencerProfile
-      setProfile(p)
       if (p.name) updateName(p.name)
       setProfileForm({ 
         name: p.name || "", 
@@ -120,9 +117,10 @@ export default function InfluencerDashboard() {
       setProfileSaved(true)
       setTimeout(() => setProfileSaved(false), 2000)
       fetchData()
-    } catch (err: any) { 
-      console.error(err);
-      alert(err.response?.data?.error || err.message || "Failed to save profile.");
+    } catch (err: unknown) { 
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
+      console.error(error);
+      alert(error.response?.data?.error || error.message || "Failed to save profile.");
     } finally { setSavingProfile(false) }
   }
 
@@ -151,7 +149,14 @@ export default function InfluencerDashboard() {
   }
 
   const handleNegSign = async (id: string) => {
-    try { await apiCall("patch", `/negotiations/${id}/sign`); fetchData(); alert("Campaign officially signed and is now Active!") } catch (err: any) { alert(err.response?.data?.error || err.message) }
+    try { 
+      await apiCall("patch", `/negotiations/${id}/sign`); 
+      fetchData(); 
+      alert("Campaign officially signed and is now Active!"); 
+    } catch (err: unknown) { 
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
+      alert(error.response?.data?.error || error.message);
+    }
   }
 
   const toggleArrayItem = (field: "niche" | "platform" | "videoLength", value: string) => {
@@ -366,7 +371,7 @@ export default function InfluencerDashboard() {
                             <Button size="sm" onClick={() => handleNegSign(neg.id)} className="bg-blue-600 hover:bg-blue-700 font-bold">Sign Contract</Button>
                           ) : (
                             <span className="text-sm text-green-400 font-bold flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4" /> 
+                              <CheckCircle2 className="h-4 w-4" /> 
                               {neg.brandSigned ? "Signing complete!" : "Waiting for brand to sign..."}
                             </span>
                           )}
@@ -405,7 +410,7 @@ export default function InfluencerDashboard() {
               {campaigns.filter(c => c.status === 'COMPLETED').map(camp => (
                 <Card key={camp.id} className="bg-slate-900/40 border-slate-800">
                   <CardContent className="p-4 flex gap-3 items-center">
-                    <div className="h-10 w-10 rounded bg-green-500/10 flex items-center justify-center border border-green-500/20"><CheckCircle className="h-5 w-5 text-green-400" /></div>
+                    <div className="h-10 w-10 rounded bg-green-500/10 flex items-center justify-center border border-green-500/20"><CheckCircle2 className="h-5 w-5 text-green-400" /></div>
                     <div className="flex-1 min-w-0"><p className="text-xs text-slate-500 flex items-center gap-1"><Zap className="h-3 w-3 text-yellow-400" /> Rep NFT</p><p className="font-mono text-sm text-green-400 truncate">#{camp.nftTokenId || 'Minting...'}</p></div>
                     {camp.txHash && <a href={`https://sepolia.etherscan.io/tx/${camp.txHash}`} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white"><ExternalLink className="h-4 w-4" /></a>}
                   </CardContent>

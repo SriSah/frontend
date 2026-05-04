@@ -33,7 +33,7 @@ type Campaign = {
   contractSignedAt?: string | null; txHash?: string | null;
 }
 
-type Negotiation = { id: string; influencerId: string; influencer: { name: string; niche?: string }; offeredBudget: number; counterBudget?: number; finalBudget?: number; deliverable: string; status: string; initiatedBy: string; brandAccepted: boolean; influencerAccepted: boolean; note?: string; counterNote?: string }
+type Negotiation = { id: string; influencerId: string; influencer: { name: string; niche?: string }; offeredBudget: number; counterBudget?: number; finalBudget?: number; deliverable: string; status: string; initiatedBy: string; brandAccepted: boolean; influencerAccepted: boolean; brandSigned: boolean; influencerSigned: boolean; note?: string; counterNote?: string }
 
 type ChainHealth = {
   status: string; network?: { name: string; chainId: number }; latestBlock?: number;
@@ -434,7 +434,7 @@ export default function BrandDashboard() {
                           <Button size="sm" onClick={() => handleNegSign(neg.id)} className="bg-blue-600 hover:bg-blue-700 font-bold">Sign Contract</Button>
                         ) : (
                           <span className="text-sm text-green-400 font-bold flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4" />
+                            <CheckCircle2 className="h-4 w-4" />
                             {neg.influencerSigned ? "Signing complete!" : "Waiting for influencer to sign..."}
                           </span>
                         )}

@@ -8,7 +8,7 @@ import { apiCall } from "@/lib/api"
 import {
   X, DollarSign, FileText, Clock, CheckCircle2,
   MessageSquare, ArrowRight, Pen, Send, RefreshCw,
-  Sparkles, ExternalLink
+  Sparkles, ExternalLink, Lock
 } from "lucide-react"
 
 interface Negotiation {
@@ -22,6 +22,8 @@ interface Negotiation {
   status: string
   brandAccepted: boolean
   influencerAccepted: boolean
+  brandSigned: boolean
+  influencerSigned: boolean
   note?: string | null
   counterNote?: string | null
   brand?: { name: string }
