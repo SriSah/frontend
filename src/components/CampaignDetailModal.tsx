@@ -337,9 +337,10 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 mix-blend-overlay pointer-events-none" />
                 
                 <div className="relative z-10">
-                  {campaign.status === 'ACTIVE' && role === 'INFLUENCER' && (
+                  {campaign.status === 'FUNDED' && role === 'INFLUENCER' && (
                     <div className="space-y-3">
-                      <p className="text-sm text-slate-300">Submit your work URL. The brand will be notified to deposit {formatCurrency(campaign.budget)} to unlock it.</p>
+                      <p className="text-sm text-blue-400 font-bold flex items-center gap-2"><Lock className="h-4 w-4" /> Funds Secured in Escrow!</p>
+                      <p className="text-sm text-slate-300">The money is locked in the smart contract. You can now safely submit your work URL.</p>
                       <input
                         type="text"
                         placeholder="https://youtube.com/..."
@@ -347,26 +348,32 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                         value={submissionUrl}
                         onChange={e => setSubmissionUrl(e.target.value)}
                       />
-                      <Button onClick={handleSubmitWork} disabled={!!actionLoading || !submissionUrl} className="w-full bg-blue-600 hover:bg-blue-700 font-bold">
+                      <Button onClick={handleSubmitWork} disabled={!!actionLoading || !submissionUrl} className="w-full bg-blue-600 hover:bg-blue-700 font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)]">
                         {actionLoading === "submit_work" ? "Submitting..." : "Submit Deliverable"}
                       </Button>
                     </div>
                   )}
-                  {campaign.status === 'ACTIVE' && role === 'BRAND' && (
-                    <p className="text-slate-400 text-sm">Waiting for Influencer to sign the final contract...</p>
+                  {campaign.status === 'ACTIVE' && role === 'INFLUENCER' && (
+                    <p className="text-slate-400 text-sm text-center py-2 italic">Contract signed. Waiting for Brand to deposit funds into escrow...</p>
                   )}
 
-                  {campaign.status === 'DELIVERED' && role === 'BRAND' && (
+                  {campaign.status === 'ACTIVE' && role === 'BRAND' && (
                     <div className="space-y-3 text-center">
-                      <p className="text-sm text-emerald-400 font-bold">Deliverable Submitted!</p>
-                      <p className="text-sm text-slate-300">Deposit {formatCurrency(campaign.budget)} to the smart contract to unlock and review the content.</p>
+                      <p className="text-sm text-blue-400 font-bold">Contract Signed! Next Step: Escrow</p>
+                      <p className="text-sm text-slate-300">Deposit {formatCurrency(campaign.budget)} to the smart contract. This shows the influencer you are ready and secures their payment.</p>
                       <Button onClick={handleDeposit} disabled={!!actionLoading} className="w-full bg-emerald-600 hover:bg-emerald-700 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                        {actionLoading === "deposit_funds" ? "Locking Funds on Chain..." : `Deposit ${formatCurrency(campaign.budget)} to View`}
+                        {actionLoading === "deposit_funds" ? "Locking Funds on Chain..." : `Deposit ${formatCurrency(campaign.budget)} to Escrow`}
                       </Button>
                     </div>
                   )}
+
+                  {campaign.status === 'FUNDED' && role === 'BRAND' && (
+                    <p className="text-sm text-blue-400 italic text-center py-2">Funds secured in escrow. Waiting for Influencer to submit work...</p>
+                  )}
                   {campaign.status === 'DELIVERED' && role === 'INFLUENCER' && (
-                    <p className="text-sm text-slate-400 italic text-center py-2">Deliverable submitted. Waiting for brand to deposit funds...</p>
+                    <p className="text-sm text-emerald-400 italic text-center py-2 font-bold flex items-center justify-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" /> Work submitted! Waiting for Brand to verify and release funds.
+                    </p>
                   )}
 
                   {campaign.status === 'FUNDED' && role === 'BRAND' && (
