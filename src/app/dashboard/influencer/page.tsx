@@ -9,7 +9,7 @@ import { Wallet, Award, DollarSign, Clock, ExternalLink, CheckCircle2, Shield, Z
 import { useAuth } from "@/lib/auth-context"
 
 type InfluencerProfile = { id: string; name: string; platform: string; niche: string; bio?: string; engagementRate: number; pricing: number; walletAddress?: string; videoLength?: string; followers?: number }
-type Campaign = { id: string; deliverable: string; status: string; budget: number; nftTokenId?: string | null; txHash?: string | null; chainCampaignId?: string | null; brand?: { id: string; name: string; industry?: string | null }; influencer?: { id: string; name: string; niche?: string | null } | null; isPublic?: boolean; niche?: string; videoLength?: string }
+type Campaign = { id: string; deliverable: string; status: string; budget: number; nftTokenId?: string | null; txHash?: string | null; chainCampaignId?: string | null; revisionNote?: string | null; brand?: { id: string; name: string; industry?: string | null }; influencer?: { id: string; name: string; niche?: string | null } | null; isPublic?: boolean; niche?: string; videoLength?: string }
 type Negotiation = { id: string; brandId: string; brand: { name: string }; offeredBudget: number; counterBudget?: number; finalBudget?: number; deliverable: string; status: string; initiatedBy: string; brandAccepted: boolean; influencerAccepted: boolean; brandSigned: boolean; influencerSigned: boolean; note?: string; counterNote?: string }
 type ReputationData = { totalReputationScore: number; completedCampaigns: number; tier: "Bronze" | "Silver" | "Gold" }
 type Tab = "profile" | "dashboard" | "browse"
@@ -23,6 +23,9 @@ const STATUS_BADGE: Record<string, string> = {
   DRAFT: "bg-slate-700/50 text-slate-300 border-slate-600",
   NEGOTIATING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
   ACTIVE: "bg-green-500/10 text-green-400 border-green-500/30",
+  FUNDED: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+  DELIVERED: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+  NEEDS_REVISION: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
   COMPLETED: "bg-blue-500/10 text-blue-400 border-blue-500/30",
   CANCELLED: "bg-red-500/10 text-red-400 border-red-500/30",
 }

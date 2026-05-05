@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
@@ -8,7 +8,7 @@ import { apiCall } from "@/lib/api"
 import {
   X, DollarSign, FileText, Clock, CheckCircle2,
   MessageSquare, ArrowRight, Pen, Send, RefreshCw,
-  Sparkles, ExternalLink, Lock
+  Sparkles, ExternalLink, Lock, AlertCircle
 } from "lucide-react"
 
 interface Negotiation {
@@ -43,6 +43,7 @@ interface Campaign {
   contractSignedAt?: string | null
   txHash?: string | null
   submissionUrl?: string | null
+  revisionNote?: string | null
 }
 
 interface CampaignDetailModalProps {
@@ -57,8 +58,9 @@ const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-slate-700/50 text-slate-300 border-slate-600",
   NEGOTIATING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
   ACTIVE: "bg-green-500/10 text-green-400 border-green-500/30",
-  DELIVERED: "bg-blue-500/10 text-blue-400 border-blue-500/30",
   FUNDED: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+  DELIVERED: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+  NEEDS_REVISION: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
   COMPLETED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
   CANCELLED: "bg-red-500/10 text-red-400 border-red-500/30",
   PENDING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
@@ -76,7 +78,8 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
   const [activeNeg, setActiveNeg] = useState<Negotiation | null>(null)
   
   // Escrow States
-  const [submissionUrl, setSubmissionUrl] = useState("")
+  const [submissionUrl, setSubmissionUrl] = useState(campaign.submissionUrl || "")
+  const [revisionMsg, setRevisionMsg] = useState("")
 
   const loadNegotiations = async () => {
     setLoadingNegs(true)
@@ -231,6 +234,24 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
       setActionLoading(null);
     }
   }
+  const handleRevision = async () => {
+    if (!revisionMsg) return;
+    setActionLoading("request_revision");
+    try {
+      await apiCall("post", `/campaigns/${campaign.id}/revision`, { note: revisionMsg });
+      setRevisionMsg("");
+      onRefresh();
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(null);
+    }
+  }
+  useEffect(() => {
+    loadNegotiations()
+    setSubmissionUrl(campaign.submissionUrl || "")
+  }, [campaign.id, campaign.submissionUrl])
 
   const activeNegotiation = negotiations.find(n => ['PENDING', 'COUNTERED', 'ACCEPTED'].includes(n.status))
   const statusCls = STATUS_COLORS[campaign.status] || STATUS_COLORS.DRAFT
@@ -310,7 +331,7 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
           </div>
 
           {/* Escrow & Work Section */}
-          {['ACTIVE', 'DELIVERED', 'FUNDED', 'COMPLETED'].includes(campaign.status) && (
+          {['ACTIVE', 'DELIVERED', 'FUNDED', 'NEEDS_REVISION', 'COMPLETED'].includes(campaign.status) && (
             <div className="border-t border-slate-800 pt-4 space-y-4">
               <h4 className="font-bold flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" /> Escrow & Fulfillment
@@ -319,12 +340,12 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
               {/* Mini Timeline Tracker */}
               <div className="flex items-center justify-between px-2 mb-2">
                 <div className="flex flex-col items-center gap-1 w-1/3">
-                  <div className={`h-4 w-4 rounded-full ${['ACTIVE', 'DELIVERED', 'FUNDED', 'COMPLETED'].includes(campaign.status) ? "bg-emerald-500" : "bg-slate-700"}`} />
+                  <div className={`h-4 w-4 rounded-full ${['ACTIVE', 'DELIVERED', 'FUNDED', 'NEEDS_REVISION', 'COMPLETED'].includes(campaign.status) ? "bg-emerald-500" : "bg-slate-700"}`} />
                   <p className="text-[10px] text-slate-400 font-bold uppercase text-center mt-1">Agreement Signed</p>
                 </div>
-                <div className={`h-0.5 flex-1 ${['DELIVERED', 'FUNDED', 'COMPLETED'].includes(campaign.status) ? "bg-emerald-500" : "bg-slate-700"} -mt-5`} />
+                <div className={`h-0.5 flex-1 ${['DELIVERED', 'FUNDED', 'NEEDS_REVISION', 'COMPLETED'].includes(campaign.status) ? "bg-emerald-500" : "bg-slate-700"} -mt-5`} />
                 <div className="flex flex-col items-center gap-1 w-1/3">
-                  <div className={`h-4 w-4 rounded-full ${['FUNDED', 'COMPLETED'].includes(campaign.status) ? "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" : "bg-slate-700"} flex items-center justify-center`} />
+                  <div className={`h-4 w-4 rounded-full ${['FUNDED', 'NEEDS_REVISION', 'COMPLETED'].includes(campaign.status) ? "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" : "bg-slate-700"} flex items-center justify-center`} />
                   <p className="text-[10px] text-slate-400 font-bold uppercase text-center mt-1">Funds Locked</p>
                 </div>
                 <div className={`h-0.5 flex-1 ${['COMPLETED'].includes(campaign.status) ? "bg-blue-500" : "bg-slate-700"} -mt-5`} />
@@ -353,11 +374,24 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                     <p className="text-slate-400 text-sm text-center py-2 italic">Contract signed. Waiting for Brand to deposit funds into escrow before you can submit work...</p>
                   )}
 
-                  {/* STAGE 2: FUNDED (Escrowed, waiting for submission) */}
-                  {campaign.status === 'FUNDED' && role === 'INFLUENCER' && (
+                  {/* STAGE 2: FUNDED or NEEDS_REVISION (waiting for submission) */}
+                  {['FUNDED', 'NEEDS_REVISION'].includes(campaign.status) && role === 'INFLUENCER' && (
                     <div className="space-y-3">
-                      <p className="text-sm text-blue-400 font-bold flex items-center gap-2"><Lock className="h-4 w-4" /> Funds Secured in Escrow!</p>
-                      <p className="text-sm text-slate-300">The money is locked in the smart contract. You can now safely submit your work URL.</p>
+                      <p className="text-sm text-blue-400 font-bold flex items-center gap-2">
+                        {campaign.status === 'NEEDS_REVISION' ? <AlertCircle className="h-4 w-4 text-yellow-400" /> : <Lock className="h-4 w-4" />}
+                        {campaign.status === 'NEEDS_REVISION' ? "Revision Requested" : "Funds Secured in Escrow!"}
+                      </p>
+                      
+                      {campaign.status === 'NEEDS_REVISION' && campaign.revisionNote && (
+                        <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded text-sm text-yellow-200 italic mb-2">
+                          <span className="font-bold text-yellow-500 non-italic block mb-1">Brand Feedback:</span>
+                          &quot;{campaign.revisionNote}&quot;
+                        </div>
+                      )}
+
+                      <p className="text-sm text-slate-300">
+                        {campaign.status === 'NEEDS_REVISION' ? "Please review the feedback and re-submit the updated link." : "The money is locked in the smart contract. You can now safely submit your work URL."}
+                      </p>
                       <input
                         type="text"
                         placeholder="https://youtube.com/..."
@@ -366,8 +400,17 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                         onChange={e => setSubmissionUrl(e.target.value)}
                       />
                       <Button onClick={handleSubmitWork} disabled={!!actionLoading || !submissionUrl} className="w-full bg-blue-600 hover:bg-blue-700 font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)]">
-                        {actionLoading === "submit_work" ? "Submitting..." : "Submit Deliverable"}
+                        {actionLoading === "submit_work" ? "Submitting..." : (campaign.status === 'NEEDS_REVISION' ? "Re-submit Deliverable" : "Submit Deliverable")}
                       </Button>
+                    </div>
+                  )}
+
+                  {campaign.status === 'NEEDS_REVISION' && role === 'BRAND' && (
+                    <div className="text-center py-4 space-y-2">
+                      <p className="text-sm text-yellow-400 font-bold flex items-center justify-center gap-2">
+                        <Clock className="h-4 w-4" /> Revision in Progress
+                      </p>
+                      <p className="text-sm text-slate-400 italic">Waiting for Influencer to re-submit work based on your feedback...</p>
                     </div>
                   )}
                   {campaign.status === 'FUNDED' && role === 'BRAND' && (
@@ -386,10 +429,34 @@ export function CampaignDetailModal({ campaign, role, onClose, onRefresh }: Camp
                         <span className="text-slate-500 block mb-1 font-bold text-xs">Submission Link:</span>
                         <a href={campaign.submissionUrl || "#"} target="_blank" rel="noreferrer" className="underline hover:text-blue-300 transition-colors">{campaign.submissionUrl}</a>
                       </div>
-                      <p className="text-sm text-slate-300 text-center">Please review the work. If it meets requirements, release the funds to the influencer.</p>
-                      <Button onClick={handleVerify} disabled={!!actionLoading} className="w-full bg-blue-600 hover:bg-blue-700 font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)]">
-                        {actionLoading === "verify_work" ? "Releasing Funds..." : "Verify & Release Funds"}
-                      </Button>
+                      <p className="text-sm text-slate-300 text-center">Please review the work. You can either release the funds or request changes.</p>
+                      
+                      <div className="flex gap-2">
+                        <Button onClick={handleVerify} disabled={!!actionLoading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                          {actionLoading === "verify_work" ? "Releasing..." : "Verify & Payout"}
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowNegs(!showNegs)} className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10">
+                          Request Changes
+                        </Button>
+                      </div>
+
+                      {showNegs && (
+                        <div className="pt-2 animate-in slide-in-from-top-2 duration-200">
+                          <textarea
+                            placeholder="What needs to be changed? (e.g. Please use the blue logo...)"
+                            className="w-full text-sm px-3 py-2 rounded bg-slate-950 border border-slate-700 text-white h-20 resize-none mb-2"
+                            value={revisionMsg}
+                            onChange={e => setRevisionMsg(e.target.value)}
+                          />
+                          <Button 
+                            onClick={handleRevision} 
+                            disabled={!revisionMsg || !!actionLoading}
+                            className="w-full bg-yellow-600 hover:bg-yellow-700 font-bold"
+                          >
+                            {actionLoading === "request_revision" ? "Sending..." : "Send Revision Request"}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                   {campaign.status === 'DELIVERED' && role === 'INFLUENCER' && (

@@ -28,6 +28,7 @@ type Brand = {
 type Campaign = {
   id: string; deliverable: string; status: string; budget: number;
   niche?: string | null; videoLength?: string | null; isPublic?: boolean;
+  revisionNote?: string | null;
   brand?: { id: string; name: string; industry?: string | null };
   influencer?: { id: string; name: string; niche?: string | null; followers?: number; engagementRate?: number } | null;
   contractSignedAt?: string | null; txHash?: string | null;
@@ -44,6 +45,9 @@ const STATUS_BADGE: Record<string, string> = {
   DRAFT: "bg-slate-700/50 text-slate-300 border-slate-600",
   NEGOTIATING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
   ACTIVE: "bg-green-500/10 text-green-400 border-green-500/30",
+  FUNDED: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+  DELIVERED: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+  NEEDS_REVISION: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
   COMPLETED: "bg-blue-500/10 text-blue-400 border-blue-500/30",
   CANCELLED: "bg-red-500/10 text-red-400 border-red-500/30",
 }
